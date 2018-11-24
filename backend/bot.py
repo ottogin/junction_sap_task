@@ -33,9 +33,47 @@ print('Questions read!')
 vectorizer = make_vectorizer(questions)
 
 
+class State:
+    def __init__(self):
+        self._state = 'default_state'
+
+    def set(self, state):
+        print('State changed from {} to {}'.format(self._state, state))
+        self._state = state
+
+    def __eq__(self, other):
+        return self._state == other
+
+state = State()
+
+def process_state():
+    "We are open from 8 a.m. to 8 p.m. every day except Mondays. Scincerely yours, whatSAP bank."
+    if state == 'default_state':
+        pass
+    elif state == 'card_block':
+        # Popup authentification
+        state.set('auth???')
+    elif state == 'auth':
+        # Make popup with auth
+        state.set('block???')
+    elif state == 'block':
+        # Make popup with block
+        state.set('default_state')
+    elif state == 'worktime':
+        # Make popup with worktime
+        state.set('worktime???')
+
+
+def process_message(text):
+    if state == 'default_state':
+        get_top_answer(vectorizer, model, questions, text)(state)
+
+    process_state()
+
+
 def text(bot, update):
     update.message.reply_text(update.message.text)
-    get_top_answer(vectorizer, model, questions, update.message.text)()
+    process_message(update.message.text)
 
 
 def voice(bot, update):
@@ -61,6 +99,7 @@ def voice(bot, update):
     text = recognizer.recognize_google(audio)
 
     update.message.reply_text(text)
+    process_message(text)
 
 
 def error(bot, update, error):

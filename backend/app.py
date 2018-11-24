@@ -4,8 +4,10 @@ from flask import Flask, request
 from faq import make_vectorizer, get_top_answer
 from gensim.models import KeyedVectors
 from sys import stderr
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 print('Loading model...', file=stderr)
 
@@ -28,10 +30,13 @@ def hello():
     return "Hello World!"
 
 
-@app.route('/get_answer_text', methods=['POST'])
+@app.route('/get_answer_text', methods=['GET', 'POST', 'OPTIONS'])
 def get_answer_text():
+    print('asd')
     print(request.json)
-    return request.json
+    with open('dorojka.wav', 'w+') as file:
+        file.write(request.json['text'])
+    return 'Succ'
     #data = eval(request.json)['text']
     #return get_top_answer(vectorizer, model, questions, data)()
 

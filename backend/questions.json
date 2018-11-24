@@ -26,7 +26,7 @@
             "What should I do if I lose my card",
             "I've lost wallet with credit cards What should I do"
         ],
-        "action": lambda: "link to card blocking"
+        "action": lambda state: state.set("card_block")
     },
     {
         "question": "What time do you work at",
@@ -35,7 +35,7 @@
             "What hours are you open at",
             "When could I visit your office"
         ],
-        "action": lambda: "We are open from 8 a.m. to 8 p.m. every day except Mondays. Scincerely yours, whatSAP bank."
+        "action": lambda state: state.set("worktime")
     },
     {
         "question": "What is current exchange rate at your bank now",
