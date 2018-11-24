@@ -1,0 +1,34 @@
+[
+    {
+        'question': 'What is the weather today?',
+        'paraphrases': [
+            'I want to know the today\'s weather!',
+            'Tell me the weather for today, please.'
+        ],
+        'action': lambda: 'weather',
+    },
+    {
+        'question': 'How old are you?',
+        'paraphrases': [
+            'What is your age?',
+            'Tell me your age, please.'
+        ],
+        'action': lambda: 'age',
+    },
+    {
+        'question': 'Hello, I want to change my phone tariff',
+        'paraphrases': [
+            'My phone tariff is not good enough for me',
+            'I don\'t like my current tariff'
+        ],
+        'action': lambda: 'tariff',
+    },
+    {
+        'question': 'Hi, I want to order a restaurant',
+        'paraphrases': [
+            'Hello, I want to order a taxi',
+            'I would want to book a room'
+        ],
+        'action': lambda: 'ordering',
+    },
+]
