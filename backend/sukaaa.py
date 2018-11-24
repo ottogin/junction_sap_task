@@ -4,6 +4,10 @@ import pytest
 
 url = 'http://127.0.0.1:5000/get_answer_text'
 
+response = requests.post('http://127.0.0.1:5000/get_answer_voice', json=json.dumps({'text': 'text', 'number': 3}))
+print(response.text)
+exit(0)
+
 with open('questions.json', 'r') as inp:
     questions = eval(inp.read())
 

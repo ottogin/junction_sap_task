@@ -165,7 +165,7 @@ def identify(path_to_audio, users_ids_to_identify = get_all_users()):
                "sampleRate": body.sample_rate, 
                "encoding": body.encoding, 
                "languageCode": body.language_code, 
-               "speakerIds" : all_users}
+               "speakerIds" : users_ids_to_identify}
 
     headers = {
         'content-type': 'application/json'
@@ -225,11 +225,19 @@ if __name__ == '__main__':
     ide_user, conf, all_seg = identify('./voice_samples/Tema2.m4a', users_ids_to_identify = all_users)
     print(usersid2name[ide_user], conf)
 
-    ide_user, conf,all_seg = identify('./voice_samples/Ahan3.m4a', users_ids_to_identify = all_users)
+    ide_user, conf,all_seg = identify('./voice_samples/Ahan3.m4a', users_ids_to_identify = ['user4'])
     print(usersid2name[ide_user], conf)
 
     ide_user, conf,all_seg = identify('./voice_samples/Nikita2.m4a', users_ids_to_identify = all_users)
     print(usersid2name[ide_user], conf)
 
+    ide_user, conf,all_seg = identify('./voice_samples/Nikita2.m4a', users_ids_to_identify = ['user2'])
+    print(usersid2name[ide_user], conf, all_seg)
+
+    ide_user, conf,all_seg = identify('./voice_samples/Nikita2.m4a', users_ids_to_identify = ['user3'])
+    print(usersid2name[ide_user], conf, all_seg)
+
     ide_user, conf,all_seg = identify('./voice_samples/mish_2.m4a', users_ids_to_identify = all_users)
     print(usersid2name[ide_user], conf)
+
+
