@@ -49,3 +49,14 @@ def get_top_answer(vectorizer, model, questions, input_question):
                              for paraphrase in question['paraphrases']])
         scores.append(score)
     return questions[np.argmax(scores)]['action']
+
+
+def get_top_answer(vectorizer, model, questions, input_question):
+    scores = []
+    emb = get_embedding(vectorizer, model, input_question)
+    for question in questions:
+        score = cosine_similarity(emb, get_embedding(vectorizer, model, question['question']))
+        score = np.mean([score, *[cosine_similarity(emb, get_embedding(vectorizer, model, paraphrase))
+                             for paraphrase in question['paraphrases']]], axis=0)
+        scores.append(score)
+    return questions[np.argmax(scores)]['action']

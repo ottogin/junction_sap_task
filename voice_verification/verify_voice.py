@@ -1,4 +1,8 @@
 # need pip install deepaffects
+#in case of trubles:
+# Download and extract the files @sbraz mentioned previously to ~/Downloads: http://mediaarea.net/download/binary/libmediainfo0/0.7.84/MediaInfo_DLL_0.7.84_Mac_i386+x86_64.tar.bz2
+# Then copy the file libmediainfo.0.dylib to /usr/local/lib
+
 from __future__ import print_function
 import time
 import deepaffects
@@ -193,39 +197,39 @@ if __name__ == '__main__':
     usersid2name = {'user1':'Artem', 'user2':'Nikita', 'user3':'Misha', 'user4':'Ahan', 'user5': 'Venya',
                    'UserNotIdentified': 'UserNotIdentified'}
     
-    status = add_user(['./enrol_voices/Artem1.m4a', 
-                       './enrol_voices/Artem2.m4a', 
-                       './enrol_voices/Artem3.m4a'], 
-                       'user1')
-    status = add_user(['./enrol_voices/Nikita1.m4a', 
-                       './enrol_voices/Nikita2.m4a', 
-                       './enrol_voices/Nikita3.m4a'], 
-                       'user2')
-    status = add_user(['./enrol_voices/Misha1.m4a', 
-                       './enrol_voices/Misha2.m4a', 
-                       './enrol_voices/Misha3.m4a'], 
-                       'user3')
-    status = add_user(['./enrol_voices/Ahan1.m4a', 
-                       './enrol_voices/Ahan2.m4a', 
-                       './enrol_voices/Ahan3.m4a'], 
-                       'user4')
-    status = add_user(['./enrol_voices/Venya1.m4a', 
-                       './enrol_voices/Venya2.m4a', 
-                       './enrol_voices/Venya3.m4a'], 
-                       'user5')
+#     status = add_user(['./enrol_voices/Artem1.m4a', 
+#                        './enrol_voices/Artem2.m4a', 
+#                        './enrol_voices/Artem3.m4a'], 
+#                        'user1')
+#     status = add_user(['./enrol_voices/Nikita1.m4a', 
+#                        './enrol_voices/Nikita2.m4a', 
+#                        './enrol_voices/Nikita3.m4a'], 
+#                        'user2')
+#     status = add_user(['./enrol_voices/Misha1.m4a', 
+#                        './enrol_voices/Misha2.m4a', 
+#                        './enrol_voices/Misha3.m4a'], 
+#                        'user3')
+#     status = add_user(['./enrol_voices/Ahan1.m4a', 
+#                        './enrol_voices/Ahan2.m4a', 
+#                        './enrol_voices/Ahan3.m4a'], 
+#                        'user4')
+#     status = add_user(['./enrol_voices/Venya1.m4a', 
+#                        './enrol_voices/Venya2.m4a', 
+#                        './enrol_voices/Venya3.m4a'], 
+#                        'user5')
     
     all_users = get_all_users()
     print(all_users)
     
     #testing
-    ide_user, conf, all_seg = identify('./backup/Tema2.m4a', users_ids_to_identify = all_users)
+    ide_user, conf, all_seg = identify('./voice_samples/Tema2.m4a', users_ids_to_identify = all_users)
     print(usersid2name[ide_user], conf)
 
-    ide_user, conf,all_seg = identify('./backup/Ahan3.m4a', users_ids_to_identify = all_users)
+    ide_user, conf,all_seg = identify('./voice_samples/Ahan3.m4a', users_ids_to_identify = all_users)
     print(usersid2name[ide_user], conf)
 
-    ide_user, conf,all_seg = identify('./backup/Nikita2.m4a', users_ids_to_identify = all_users)
+    ide_user, conf,all_seg = identify('./voice_samples/Nikita2.m4a', users_ids_to_identify = all_users)
     print(usersid2name[ide_user], conf)
 
-    ide_user, conf,all_seg = identify('./backup/Misha1.m4a', users_ids_to_identify = all_users)
+    ide_user, conf,all_seg = identify('./voice_samples/mish_2.m4a', users_ids_to_identify = all_users)
     print(usersid2name[ide_user], conf)

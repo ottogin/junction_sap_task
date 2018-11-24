@@ -28,6 +28,7 @@ def hello():
 
 @app.route('/get_answer_text', methods=['POST'])
 def get_answer_text():
+    print(request.json)
     data = eval(request.json)['text']
     return get_top_answer(vectorizer, model, questions, data)()
 

@@ -1,0 +1,7 @@
+{
+  "test.py::test_block": true,
+  "test.py::test_currency": true,
+  "test.py::test_docs": true,
+  "test.py::test_pin": true,
+  "test.py::test_tariff": true
+}

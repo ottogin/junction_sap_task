@@ -2,10 +2,9 @@
     {
         "question": "I would like to unsubscribe from SMS notifications",
         "paraphrases": [
-            "Can you decline my notifications?",
-            "May I refuse SMS about operations?",
-            "How can I deny notifications?",
-            "How could I cancel my SMS subscription?"
+            "Can you decline my SMS notifications",
+            "I don't want to get SMS about operations anymore",
+            "How could I cancel my SMS subscription"
         ],
         "action": lambda: "link to notifications page"
     },
@@ -14,58 +13,54 @@
         "paraphrases": [
             "My tariff is not good enough for me",
             "I don\"t like my current tariff",
-            "How could I change my card tarif?",
-            "I am going to alter my account options"
+            "How could I change my tariff"
         ],
         "action": lambda: "link to his tariff change"
     },
     {
-        "question": "I wish to block my card",
+        "question": "I want to block my card",
         "paraphrases": [
-            "Hello, I lost my bank card, could you block it?",
-            "I would want to block my card",
+            "Hello, I lost my bank card, could you block it",
             "I would like to block my credit card",
-            "I lost my card and I would to block it",
-            "What should I do, if I lose my card?",
-            "I've lost wallet with credit cards! What should I do?"
+            "I lost my card and I want to block it",
+            "What should I do if I lose my card",
+            "I've lost wallet with credit cards What should I do"
         ],
         "action": lambda: "link to card blocking"
     },
     {
-        "question": "What time do you work at?",
+        "question": "What time do you work at",
         "paraphrases": [
-            "What is your working time?",
-            "At what hours are you open?",
-            "When is your office is open?",
-            "When could I visit your office?"
+            "What is your working time",
+            "What hours are you open at",
+            "When could I visit your office"
         ],
         "action": lambda: "We are open from 8 a.m. to 8 p.m. every day except Mondays. Scincerely yours, whatSAP bank."
     },
     {
-        "question": "What is current exchange rate at your bank now?",
+        "question": "What is current exchange rate at your bank now",
         "paraphrases": [
-            "How musch does dollar cost?",
-            "For which price may I sell dollars now?",
-            "How expensive franks are now?",
-            "What is currency of euros now?"
+            "How much does one dollar cost",
+            "What is exchange rate of euros now"
         ],
-        "action": lambda: "For this moment the exchange rates are:" // drop current change table
+        "action": lambda: "For this moment the exchange rates are:" # drop current change table
     },
     {   
-        "question": "How could I change the PIN code?",
+        "question": "How can I change the PIN code",
         "paraphrases": [
-            "I forgot my previous PIN code, how could I change it?",
-            "Could you change a password from my card?",
-            "Change my PIN code please!"
+            "I forgot my previous PIN code, how could I change it",
+            "I want to change my PIN code",
+            "How to change PIN code"
         ],
         "action": lambda: "To change your PIN-code, you should come to the nearest office and sign a special form. Scincerely yours, whatSAP bank."
     },
     {   
-        "question": "What documents do I need to open a new account?",
+        "question": "What documents do I need to open a new account",
         "paraphrases": [
-            "How could I open a new account?",
-            "What do I need to become your client?",
-            "I want to open a new account, what documents do I need?"
+            "How could I open a new account",
+            "What do I need to become your client",
+            "I want to open a new account what documents do I need",
+            "How do I open a new account"
         ],
         "action": lambda: "You must carry: Proof of identity and address (Passport, Voter's ID, Driving Licence, Aadhar card, NREGA card, PAN card) 2 recent passport-size colored photographs. Scincerely yours, whatSAP bank."
     }
