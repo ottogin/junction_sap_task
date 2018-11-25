@@ -1,20 +1,46 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+import json
 import logging
-import subprocess as sp
-from tqdm import tqdm
+import threading
 import requests
 import os
+import subprocess as sp
+
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from tqdm import tqdm
 import speech_recognition as sr
+from voice_verification import verify_voice
 from faq import make_vectorizer, get_top_answer
 from gensim.models import KeyedVectors
+from flask import Flask, request
+from flask_cors import CORS
+from sys import stderr
+
+os.environ['NO_PROXY'] = '127.0.0.1'
+
+URL = 'http://127.0.0.1'
+conf_threshold = 0.7
+
+
+############################# FLASK INIT ################################
+
+app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
+
+#########################################################################
+
+############################ LOGGER INIT ################################
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
 logger = logging.getLogger(__name__)
+
+#########################################################################
+
+########################### MODEL INIT ##################################
 
 print('Loading model...')
 
@@ -32,6 +58,80 @@ print('Questions read!')
 
 vectorizer = make_vectorizer(questions)
 
+#########################################################################
+
+@app.route('/')
+def hello():
+    print(json.dumps(request.json))
+    return "Succ"
+
+
+@app.route('/message', methods=['POST'])
+def message():
+    header = request.headers['Content-Type'].split(';')[0]
+
+    if header == 'application/json':
+        try:
+            text_answer = request.json['text']
+            curr_state = state.get()
+            if curr_state.endswith('???'):
+                print('Confirmation expected, but got {}'.format(text_answer), file=stderr)
+            else:
+                if chat_id is not None and gbot is not None:
+                    gbot.send_message(chat_id=chat_id, text=text_answer)
+        except KeyError:
+            print('Wrong json', file=stderr)
+    else:
+        raise ValueError('Json required!')
+
+    return "Succ"
+
+
+@app.route('/confirmation', methods=['POST'])
+def confirmation():
+    header = request.headers['Content-Type'].split(';')[0]
+
+    if header == 'application/json':
+        try:
+            if request.json['confirmed']:
+                curr_state = state.get()
+                if not curr_state.endswith('???'):
+                    print('Unexpected confirmation', file=stderr)
+                else:
+                    state.set(curr_state[:-3])
+            else:
+                state.set('default_state')
+        except KeyError:
+            print('Wrong json', file=stderr)
+    else:
+        raise ValueError('Json required!')
+
+    return "Succ"
+
+
+@app.route('/verify', methods=['POST'])
+def verify():
+    header = request.headers['Content-Type'].split(';')[0]
+
+    if header == 'application/json':
+        try:
+            userId = request.json['userId']
+            curr_state = state.get()
+            if not curr_state == 'auth???':
+                print('Unexpected verification', file=stderr)
+            else:
+                ide_user, conf, all_seg = verify_voice.identify('tmp.wav', users_ids_to_identify=[userId])
+                response = False
+                if userId == ide_user and conf > conf_threshold:
+                    response = True
+                requests.post(URL, json={"verified": response})
+        except KeyError:
+            print('Wrong json', file=stderr)
+    else:
+        raise ValueError('Json required!')
+
+    return "Succ"
+
 
 class State:
     def __init__(self):
@@ -41,42 +141,63 @@ class State:
         print('State changed from {} to {}'.format(self._state, state))
         self._state = state
 
+    def get(self):
+        return self._state
+
     def __eq__(self, other):
         return self._state == other
 
 state = State()
 
-def process_state():
-    "We are open from 8 a.m. to 8 p.m. every day except Mondays. Scincerely yours, whatSAP bank."
+
+def process_state(text):
+    "We are open from 8 a.m. to 8 p.m. every day except Mondays. Sincerely yours, whatSAP bank."
     if state == 'default_state':
-        pass
+        requests.post(URL, json={"text_popup": "card block"})
     elif state == 'card_block':
-        # Popup authentification
+        requests.post(URL, json={"text_popup": "card block"})
         state.set('auth???')
     elif state == 'auth':
-        # Make popup with auth
+        requests.post(URL, json={"text_popup": "auth req"})
         state.set('block???')
     elif state == 'block':
-        # Make popup with block
+        requests.post(URL, json={"text_popup": "block"})
         state.set('default_state')
     elif state == 'worktime':
-        # Make popup with worktime
-        state.set('worktime???')
+        requests.post(URL, json={"text_popup": "work time"})
+        state.set('default_state')
+    elif state == ('new_account'):
+        requests.post(URL, json={"text_popup": "You must carry: Proof of identity and address (Passport, Voter's ID, "
+                                           "Driving Licence, Aadhar card, NREGA card, PAN card) 2 recent passport-size"
+                                           " colored photographs. Scincerely yours, whatSAP bank."})
+        state.set('default_state')
 
 
 def process_message(text):
     if state == 'default_state':
-        get_top_answer(vectorizer, model, questions, text)(state)
+        #get_top_answer(vectorizer, model, questions, text)(state)
+        state.set(text)
 
-    process_state()
+    process_state(text)
+    requests.post(URL, json={"text": text})
 
 
 def text(bot, update):
+    global chat_id
+    chat_id = update.message.chat_id
+    global gbot
+    gbot = bot
+
     update.message.reply_text(update.message.text)
     process_message(update.message.text)
 
 
 def voice(bot, update):
+    global chat_id
+    chat_id = update.message.chat_id
+    global gbot
+    gbot = bot
+
     if os.path.exists("tmp.oga"):
         os.remove("tmp.oga")
 
@@ -106,6 +227,10 @@ def error(bot, update, error):
     logger.warning('Update "%s" caused error "%s"', update, error)
 
 
+chat_id = None
+gbot = None
+
+
 def main():
     updater = Updater("725456790:AAEzr3Z4nJVjQNx2qp2Q5b66BIGnk_lVpLs")
 
@@ -118,6 +243,8 @@ def main():
 
     updater.start_polling()
 
+    threading.Thread(target=app.run).start()
+    print('asd')
     updater.idle()
 
 

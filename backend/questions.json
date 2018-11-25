@@ -62,6 +62,6 @@
             "I want to open a new account what documents do I need",
             "How do I open a new account"
         ],
-        "action": lambda: "You must carry: Proof of identity and address (Passport, Voter's ID, Driving Licence, Aadhar card, NREGA card, PAN card) 2 recent passport-size colored photographs. Scincerely yours, whatSAP bank."
+        "action": lambda state: state.set("worktime")
     }
 ]
