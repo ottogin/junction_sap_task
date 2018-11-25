@@ -19,12 +19,13 @@ from flask_cors import CORS
 from sys import stderr
 
 
-URL = 'http://0638687f.ngrok.io'
 conf_threshold = 0.7
-chat_id = None
+chat_id_client = None
+chat_id_server = None
 gbot = None
 verified = False
-userId = ""
+userIdClient = ""
+userIdServer = ""
 qualit = 4.0
 
 
@@ -82,7 +83,7 @@ def message():
                 print('Confirmation expected, but got {}'.format(text_answer), file=stderr)
             else:
                 if chat_id is not None and gbot is not None:
-                    gbot.send_message(chat_id=chat_id, text=text_answer)
+                    gbot.send_message(chat_id=chat_id_client, text=text_answer)
         except KeyError:
             print('Wrong json', file=stderr)
     else:
@@ -137,31 +138,35 @@ def process_state():
     if state == 'default_state':
         pass
     elif state == 'card_block':
-        requests.post(URL, json={"text": "", "text_popup": "It seems that client wants to block his credit card. "
-                                                          "Firstly, You should start identification procedure.", "verified": verified})
+        gbot.send_message(chat_id=chat_id_server, text="PopUp Tip\n"
+                                                       "It seems that client wants to block his credit card. "
+                                                       "Firstly, You should start identification procedure.")
         state.set('auth???')
     elif state == 'auth':
-        requests.post(URL, json={"text": "", "text_popup": "Write Your ID number, please.", "verified": verified})
+        gbot.send_message(chat_id=chat_id_server, text="PopUp Tip\nWrite Your ID number, please.")
         state.set('auth_data???')
     elif state == 'auth_data':
-        requests.post(URL, json={"text": "", "text_popup": "Do You want to extract the information from user messages?", "verified": verified})
+        gbot.send_message(chat_id=chat_id_server, text="PopUp Tip\nDo You want to extract the information from user messages?")
         state.set('auth_verifi???')
     elif state == 'auth_verifi':
         ide_user, conf, all_seg = verify_voice.identify('tmp.wav', users_ids_to_identify=[userId])
         if userId == ide_user and conf > conf_threshold:
             verified = True
-        requests.post(URL, json={"text": "", "text_popup": "Everything is OK about this client!", "verified": verified})
+            gbot.send_message(chat_id=chat_id_server, text="PopUp Tip\nEverything is OK about this client!")
         state.set('block???')
     elif state == 'block':
-        requests.post(URL, json={"text": "", "text_popup": "Start the card blocking procedure. Please, open: https://sap.com", "verified": verified})
+        gbot.send_message(chat_id=chat_id_server,
+                          text="PopUp Tip\nStart the card blocking procedure. Please, open: https://sap.com")
         state.set('default_state')
     elif state == 'worktime':
-        requests.post(URL, json={"text": "", "text_popup": "We are open from 8 am to 8 pm ever day, and will be glad to see You :)", "verified": verified})
+        gbot.send_message(chat_id=chat_id_server,
+                          text="PopUp Tip\nWe are open from 8 am to 8 pm ever day, and will be glad to see You :)")
         state.set('default_state')
     elif state == ('new_account'):
-        requests.post(URL, json={"text": "", "text_popup": "You should bring: Proof of identity and address (Passport, Voter's ID, "
+        gbot.send_message(chat_id=chat_id_server,
+                          text="PopUp Tip\nYou should bring: Proof of identity and address (Passport, Voter's ID, "
                                            "Driving Licence, Aadhar card, NREGA card, PAN card) 2 recent passport-size"
-                                           " colored photographs. Scincerely yours, whatSAP bank.", "verified": verified})
+                                           " colored photographs. Scincerely yours, whatSAP bank.")
         state.set('default_state')
 
 
@@ -170,7 +175,7 @@ def process_message(text):
         get_top_answer(vectorizer, model, questions, text)(state)
 
     process_state()
-    requests.post(URL, json={"text":text, "text_popup": "", "verified": verified})
+    gbot.send_message(chat_id=chat_id_server, text=text)
 
 
 def emotiontoscore(emotion):
@@ -188,14 +193,19 @@ def emotiontoscore(emotion):
 
 
 def text(bot, update):
-    global userId
-    global chat_id
-    chat_id = update.message.chat_id
+    global userIdClient
+    global chat_id_client
+    global chat_id_server
     global gbot
     gbot = bot
 
+    if chat_id_client == "":
+        chat_id_client = update.message.chat_id
+    else:
+        chat_id_server = update.message.chat_id
+
     if state == "auth_verifi???":
-        userId = update.message.text
+        userIdClient = update.message.text
 
     process_message(update.message.text)
 
@@ -238,11 +248,39 @@ def error(bot, update, error):
     logger.warning('Update "%s" caused error "%s"', update, error)
 
 
+def regular_choice(bot, update, user_data):
+    text = update.message.text
+    user_data['choice'] = text
+    update.message.reply_text(
+        'Your {}? Yes, I would love to hear about that!'.format(text.lower()))
+
+    return TYPING_REPLY
+
+
+def custom_choice(bot, update):
+    update.message.reply_text('Alright, please send me the category first, '
+                              'for example "Most impressive skill"')
+
+    return TYPING_CHOICE
+
+
 def main():
     updater = Updater("725456790:AAEzr3Z4nJVjQNx2qp2Q5b66BIGnk_lVpLs")
 
     dp = updater.dispatcher
+    conv_handler = ConversationHandler(
+        entry_points=[CommandHandler('start', start)],
 
+        states={
+            CHOOSING: [RegexHandler('^(Age|Favourite colour|Number of siblings)$',
+                                    regular_choice,
+                                    pass_user_data=True),
+                       RegexHandler('^Something else...$',
+                                    custom_choice),
+                       ]
+        }
+    )
+    dp.add_handler(conv_handler)
     dp.add_handler(MessageHandler(Filters.text, text))
     dp.add_handler(MessageHandler(Filters.voice, voice))
 

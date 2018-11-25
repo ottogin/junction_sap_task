@@ -20,8 +20,8 @@
       </profile-state>
     </entry>
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.6.5 (/anaconda3/envs/web/bin/python3.6m)" project-jdk-type="Python SDK" />
-  <component name="SvnConfiguration">
-    <configuration>$USER_HOME$/.subversion</configuration>
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.5 (junction_sap_task)" project-jdk-type="Python SDK" />
+  <component name="PyCharmProfessionalAdvertiser">
+    <option name="shown" value="true" />
   </component>
 </project>
