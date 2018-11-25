@@ -222,22 +222,24 @@ if __name__ == '__main__':
     print(all_users)
     
     #testing
-    ide_user, conf, all_seg = identify('./voice_samples/Tema2.m4a', users_ids_to_identify = all_users)
-    print(usersid2name[ide_user], conf)
+    # ide_user, conf, all_seg = identify('./voice_samples/Tema2.m4a', users_ids_to_identify = all_users)
+    # print(usersid2name[ide_user], conf)
+    #
+    # ide_user, conf, all_seg = identify('./voice_samples/Ahan3.m4a', users_ids_to_identify = ['user4'])
+    # print(usersid2name[ide_user], conf)
+    #
+    # ide_user, conf, all_seg = identify('./voice_samples/Nikita2.m4a', users_ids_to_identify = all_users)
+    # print(usersid2name[ide_user], conf)
+    #
+    # ide_user, conf, all_seg = identify('./voice_samples/Nikita2.m4a', users_ids_to_identify = ['user2'])
+    # print(usersid2name[ide_user], conf, all_seg)
+    #
+    # ide_user, conf, all_seg = identify('./voice_samples/Nikita2.m4a', users_ids_to_identify = ['user3'])
+    # print(usersid2name[ide_user], conf, all_seg)
+    #
+    # ide_user, conf, all_seg = identify('./voice_samples/mish_2.m4a', users_ids_to_identify = all_users)
+    # print(usersid2name[ide_user], conf)
+    print(define_emotion_from_audio('./voice_samples/Nikita2.m4a'))
 
-    ide_user, conf, all_seg = identify('./voice_samples/Ahan3.m4a', users_ids_to_identify = ['user4'])
-    print(usersid2name[ide_user], conf)
-
-    ide_user, conf, all_seg = identify('./voice_samples/Nikita2.m4a', users_ids_to_identify = all_users)
-    print(usersid2name[ide_user], conf)
-
-    ide_user, conf, all_seg = identify('./voice_samples/Nikita2.m4a', users_ids_to_identify = ['user2'])
-    print(usersid2name[ide_user], conf, all_seg)
-
-    ide_user, conf, all_seg = identify('./voice_samples/Nikita2.m4a', users_ids_to_identify = ['user3'])
-    print(usersid2name[ide_user], conf, all_seg)
-
-    ide_user, conf, all_seg = identify('./voice_samples/mish_2.m4a', users_ids_to_identify = all_users)
-    print(usersid2name[ide_user], conf)
 
 

@@ -62,6 +62,6 @@
             "I want to open a new account what documents do I need",
             "How do I open a new account"
         ],
-        "action": lambda state: state.set("worktime")
+        "action": lambda state: state.set("new_account")
     }
 ]

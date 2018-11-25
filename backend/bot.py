@@ -18,10 +18,14 @@ from flask import Flask, request
 from flask_cors import CORS
 from sys import stderr
 
-os.environ['NO_PROXY'] = '127.0.0.1'
 
-URL = 'http://127.0.0.1'
+URL = 'http://0638687f.ngrok.io'
 conf_threshold = 0.7
+chat_id = None
+gbot = None
+verified = False
+userId = ""
+qualit = 4.0
 
 
 ############################# FLASK INIT ################################
@@ -42,19 +46,19 @@ logger = logging.getLogger(__name__)
 
 ########################### MODEL INIT ##################################
 
-print('Loading model...')
+print('Loading model...', file=stderr)
 
 recognizer = sr.Recognizer()
-# model = KeyedVectors.load_word2vec_format('backend/wiki-news-300d-1M.vec')
+model = KeyedVectors.load_word2vec_format('backend/wiki-news-300d-1M.vec')
 
-print('Model loaded!')
+print('Model loaded!', file=stderr)
 
-print('Reading questions...')
+print('Reading questions...', file=stderr)
 
 with open('backend/questions.json') as file:
     questions = eval(file.read())
 
-print('Questions read!')
+print('Questions read!', file=stderr)
 
 vectorizer = make_vectorizer(questions)
 
@@ -99,32 +103,9 @@ def confirmation():
                     print('Unexpected confirmation', file=stderr)
                 else:
                     state.set(curr_state[:-3])
+                    process_state()
             else:
                 state.set('default_state')
-        except KeyError:
-            print('Wrong json', file=stderr)
-    else:
-        raise ValueError('Json required!')
-
-    return "Succ"
-
-
-@app.route('/verify', methods=['POST'])
-def verify():
-    header = request.headers['Content-Type'].split(';')[0]
-
-    if header == 'application/json':
-        try:
-            userId = request.json['userId']
-            curr_state = state.get()
-            if not curr_state == 'auth???':
-                print('Unexpected verification', file=stderr)
-            else:
-                ide_user, conf, all_seg = verify_voice.identify('tmp.wav', users_ids_to_identify=[userId])
-                response = False
-                if userId == ide_user and conf > conf_threshold:
-                    response = True
-                requests.post(URL, json={"verified": response})
         except KeyError:
             print('Wrong json', file=stderr)
     else:
@@ -150,45 +131,72 @@ class State:
 state = State()
 
 
-def process_state(text):
+def process_state():
+    global verified
     "We are open from 8 a.m. to 8 p.m. every day except Mondays. Sincerely yours, whatSAP bank."
     if state == 'default_state':
-        requests.post(URL, json={"text_popup": "card block"})
+        pass
     elif state == 'card_block':
-        requests.post(URL, json={"text_popup": "card block"})
+        requests.post(URL, json={"text": "", "text_popup": "It seems that client wants to block his credit card. "
+                                                          "Firstly, You should start identification procedure.", "verified": verified})
         state.set('auth???')
     elif state == 'auth':
-        requests.post(URL, json={"text_popup": "auth req"})
+        requests.post(URL, json={"text": "", "text_popup": "Write Your ID number, please.", "verified": verified})
+        state.set('auth_data???')
+    elif state == 'auth_data':
+        requests.post(URL, json={"text": "", "text_popup": "Do You want to extract the information from user messages?", "verified": verified})
+        state.set('auth_verifi???')
+    elif state == 'auth_verifi':
+        ide_user, conf, all_seg = verify_voice.identify('tmp.wav', users_ids_to_identify=[userId])
+        if userId == ide_user and conf > conf_threshold:
+            verified = True
+        requests.post(URL, json={"text": "", "text_popup": "Everything is OK about this client!", "verified": verified})
         state.set('block???')
     elif state == 'block':
-        requests.post(URL, json={"text_popup": "block"})
+        requests.post(URL, json={"text": "", "text_popup": "Start the card blocking procedure. Please, open: https://sap.com", "verified": verified})
         state.set('default_state')
     elif state == 'worktime':
-        requests.post(URL, json={"text_popup": "work time"})
+        requests.post(URL, json={"text": "", "text_popup": "We are open from 8 am to 8 pm ever day, and will be glad to see You :)", "verified": verified})
         state.set('default_state')
     elif state == ('new_account'):
-        requests.post(URL, json={"text_popup": "You must carry: Proof of identity and address (Passport, Voter's ID, "
+        requests.post(URL, json={"text": "", "text_popup": "You should bring: Proof of identity and address (Passport, Voter's ID, "
                                            "Driving Licence, Aadhar card, NREGA card, PAN card) 2 recent passport-size"
-                                           " colored photographs. Scincerely yours, whatSAP bank."})
+                                           " colored photographs. Scincerely yours, whatSAP bank.", "verified": verified})
         state.set('default_state')
 
 
 def process_message(text):
     if state == 'default_state':
-        #get_top_answer(vectorizer, model, questions, text)(state)
-        state.set(text)
+        get_top_answer(vectorizer, model, questions, text)(state)
 
-    process_state(text)
-    requests.post(URL, json={"text": text})
+    process_state()
+    requests.post(URL, json={"text":text, "text_popup": "", "verified": verified})
+
+
+def emotiontoscore(emotion):
+    if emotion == 'neutral':
+        return 0
+    if emotion == 'excited':
+        return 0.4
+    if emotion == 'happy':
+        return 0.6
+    if emotion == 'sad':
+        return -0.5
+    if emotion == 'fear':
+        return -0.7
+    return 0.2
 
 
 def text(bot, update):
+    global userId
     global chat_id
     chat_id = update.message.chat_id
     global gbot
     gbot = bot
 
-    update.message.reply_text(update.message.text)
+    if state == "auth_verifi???":
+        userId = update.message.text
+
     process_message(update.message.text)
 
 
@@ -219,16 +227,15 @@ def voice(bot, update):
 
     text = recognizer.recognize_google(audio)
 
-    update.message.reply_text(text)
     process_message(text)
+    emotion, conf, _ = verify_voice.define_emotion_from_audio("tmp.wav")
+
+    global qualit
+    qualit += emotiontoscore(emotion) * conf
 
 
 def error(bot, update, error):
     logger.warning('Update "%s" caused error "%s"', update, error)
-
-
-chat_id = None
-gbot = None
 
 
 def main():
