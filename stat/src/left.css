@@ -1,0 +1,23 @@
+.left_content {
+  padding-left: 12px;
+  background-color: antiquewhite;
+  width: 35%;
+}
+.left_wrapper {
+    display: flex;
+flex-direction: column;
+text-align: left;
+}
+
+.ava_user {
+  width: 236px;
+  border-radius: 52px 2px;
+    border: 2px solid red;
+}
+.user_text{
+    text-align: left;
+    font-size: 27px;
+}
+.user_phone{
+
+}
